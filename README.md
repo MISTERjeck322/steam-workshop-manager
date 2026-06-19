@@ -1,103 +1,102 @@
 # Steam Workshop Pirate / Manager
 
-Удобный инструмент для ручного скачивания, установки и отслеживания обновлений модификаций из Мастерской Steam (Steam Workshop) напрямую через браузер. 
+A handy tool for manually downloading, installing, and tracking updates of mods from the Steam Workshop directly through your browser. 
 
-Проект состоит из двух частей:
-1. **Локального сервера** на Python (FastAPI), который управляет загрузками через официальную консольную утилиту SteamCMD.
-2. **Расширения для браузера**, которое добавляет элементы управления на веб-страницы Steam.
-
----
-
-## Для чего нужно это приложение?
-
-*   **Контроль над версиями модов**: В официальном клиенте Steam моды обновляются автоматически, что нередко ломает совместимость в сохраненных играх или нарушает работу больших сборок. Данный менеджер позволяет хранить моды локально и обновлять их только по вашему решению.
-*   **Игра в офлайн-режиме**: Инструмент помогает подготовить сборки модификаций для игры без подключения к сети, для неофициальных версий игр, а также упрощает установку модов на выделенные серверы.
-*   **Замена сомнительным веб-сервисам**: Вам больше не придется пользоваться сторонними сайтами-загрузчиками модов, которые часто ограничивают скорость, содержат обилие рекламы или отдают устаревшие файлы. Скачивание происходит напрямую с серверов Steam на максимальной скорости вашего интернет-соединения.
+The project consists of two parts:
+1. **A local Python server** (FastAPI) that manages downloads via the official SteamCMD command-line utility.
+2. **A browser extension** that adds control elements to Steam web pages.
 
 ---
 
-## Основные возможности
+## Why is this application needed?
 
-*   **Интеграция в интерфейс Steam**: Расширение встраивает кнопку «Скачать» прямо на страницы Мастерской в браузере. Поддерживается скачивание как отдельных модов, так и целых коллекций в один клик.
-*   **Удобная боковая панель**: Внутри браузера доступен полноценный менеджер загрузок, отображающий очередь скачивания, текущий прогресс и список уже добавленных модов.
-*   **Автоматическое копирование по папкам**: Вы можете один раз указать путь к папке с модами для каждой конкретной игры, и менеджер будет самостоятельно распаковывать и раскладывать скачанные файлы по нужным директориям.
-*   **Проверка и ручное обновление**: Функция сканирования сверяет даты изменения локальных файлов с актуальными версиями в Steam API. Если мод обновился, менеджер предложит скачать новую версию.
-*   **Импорт и экспорт коллекций**: Вы можете экспортировать список ваших модов в JSON-файл для резервного копирования или быстрой отправки другу, чтобы он мог скачать всю сборку одной кнопкой.
-*   **Поддержка нескольких языков**: Интерфейс переведен на английский, русский, украинский, испанский, португальский и индонезийский языки.
+*   **Control over mod versions**: In the official Steam client, mods are updated automatically, which often breaks compatibility in saved games or disrupts large modpacks. This manager allows you to store mods locally and update them only when you decide to.
+*   **Offline gaming**: The tool helps prepare mod setups for playing offline, for unofficial versions of games, and simplifies installing mods on dedicated servers.
+*   **An alternative to questionable web services**: You no longer need to use third-party downloader sites that often limit download speeds, contain excessive ads, or provide outdated files. Downloads are performed directly from Steam servers at your internet connection's maximum speed.
 
 ---
 
-## Тестирование и совместимость
+## Key Features
 
-Разработка и базовое тестирование проводились в следующем окружении:
-*   **Операционная система**: Windows 10
-*   **Браузер**: Google Chrome
-
-*Примечание: Серверная часть содержит специфичные для ОС Windows вызовы (запуск `steamcmd.exe`, скрытие системных консольных окон), поэтому запуск на других платформах (Linux/macOS) в текущей версии может потребовать ручной адаптации исходного кода.*
-
----
-
-## Инструкция для пользователей (Быстрый старт)
-
-### Шаг 1. Подготовка папок
-1. Перейдите в раздел **[Releases](https://github.com/MISTERjeck322/Steam-Workshop-Pirate/releases)** (в правой части этой страницы) и скачайте архив с последней версией программы.
-2. Распакуйте скачанный архив в любое удобное место на компьютере.
-3. Поместите утилиту `steamcmd.exe` (ее можно скачать с [официального сайта Valve](https://developer.valvesoftware.com/wiki/SteamCMD#Downloading_SteamCMD)) в папку `steamCMD`, которая находится внутри распакованного архива.
-
-### Шаг 2. Запуск сервера
-1. Запустите файл `WorkshopManagerServer.exe` из распакованного архива.
-2. Не закрывайте открывшееся окно программы, пока пользуетесь загрузчиком.
-
-### Шаг 3. Установка расширения в браузер
-1. Откройте ваш браузер (Google Chrome, Яндекс.Браузер, Opera, Edge или другой на базе Chromium) и перейдите на страницу расширений (введите в адресную строку `chrome://extensions/` или найдите в меню браузера).
-2. В правом верхнем углу включите тумблер **«Режим разработчика»** (Developer mode).
-3. Нажмите появившуюся слева кнопку **«Загрузить распакованное расширение»** (Load unpacked).
-4. В открывшемся проводнике выберите папку `SteamPirateExtension`, которая лежит в распакованном архиве.
-
-*Готово! Теперь на страницах модов в мастерской Steam появятся кнопки загрузки.*
+*   **Steam interface integration**: The extension embeds a "Download" button directly onto Workshop pages in the browser. It supports downloading both individual mods and entire collections with a single click.
+*   **Convenient sidebar**: A built-in download manager is available inside the browser, displaying the download queue, current progress, and a list of already added mods.
+*   **Automatic distribution to folders**: You can specify the path to the mod folder for each game once, and the manager will unpack and distribute the downloaded files to the appropriate directories.
+*   **Verification and manual updates**: The scan function compares the modification dates of local files with the latest versions from the Steam API. If a mod has been updated, the manager will offer to download the new version.
+*   **Import and export of collections**: You can export your mod list to a JSON file for backup or to share it with a friend, allowing them to download the entire build with a single button.
+*   **Multi-language support**: The interface is translated into English, Russian, Ukrainian, Spanish, Portuguese, and Indonesian.
 
 ---
 
-## 🛠 Инструкция для разработчиков (Запуск из исходного кода)
+## Testing and Compatibility
+
+Development and basic testing were conducted in the following environment:
+*   **Operating System**: Windows 10
+*   **Browser**: Google Chrome
+
+*Note: The server-side component contains Windows-specific calls (running `steamcmd.exe`, hiding system console windows), so running it on other platforms (Linux/macOS) in the current version may require manual adaptation of the source code.*
+
+---
+
+## User Instructions (Quick Start)
+
+### Step 1. Preparing Folders
+1. Go to the **[Releases](https://github.com/MISTERjeck322/Steam-Workshop-Pirate/releases)** section (on the right side of this page) and download the archive with the latest version of the application.
+2. Extract the downloaded archive to any convenient location on your computer.
+3. Place the `steamcmd.exe` utility (which can be downloaded from the [official Valve website](https://developer.valvesoftware.com/wiki/SteamCMD#Downloading_SteamCMD)) into the `steamCMD` folder inside the extracted archive.
+
+### Step 2. Starting the Server
+1. Run the `WorkshopManagerServer.exe` file from the extracted archive.
+2. Do not close the application window while using the downloader.
+
+### Step 3. Installing the Extension in the Browser
+1. Open your browser (Google Chrome, Yandex Browser, Opera, Edge, or another Chromium-based browser) and navigate to the extensions page (type `chrome://extensions/` into the address bar or find it in the browser menu).
+2. In the top-right corner, enable the **"Developer mode"** toggle.
+3. Click the **"Load unpacked"** button that appears on the left.
+4. In the file explorer that opens, select the `SteamPirateExtension` folder located inside the extracted archive.
+
+*Done! Download buttons will now appear on Steam Workshop mod pages.*
+
+---
+
+## 🛠 Developer Instructions (Running from Source Code)
 
 <details>
-<summary>Развернуть инструкцию по сборке и запуску кода</summary>
+<summary>Expand instructions for building and running the code</summary>
 
-Если вы хотите запустить проект напрямую из исходного кода или внести в него изменения, используйте эту инструкцию.
+If you want to run the project directly from the source code or make changes to it, use these instructions.
 
-### Требования
+### Requirements
 * Python 3.9+
-* Установленный пакетный менеджер `pip`
+* Installed package manager `pip`
 
-#### Шаг 1. Клонирование и установка зависимостей
-1. Клонируйте репозиторий на локальную машину:
+#### Step 1. Cloning and Installing Dependencies
+1. Clone the repository to your local machine:
    ```bash
    git clone https://github.com/MISTERjeck322/Steam-Workshop-Pirate.git
    ```
-2. Перейдите в папку проекта и установите библиотеки:
+2. Navigate to the project folder and install the libraries:
    ```bash
    cd Steam-Workshop-Pirate
    pip install -r requirements.txt
    ```
 
-### Шаг 2. Запуск сервера из консоли
-Запустите скрипт сервера:
+### Step 2. Running the Server from the Console
+Run the server script:
 ```bash
 python main.py
 ```
 
-### Шаг 3. Сборка исполняемого файла (.exe)
-Если вы хотите самостоятельно собрать автономный `.exe` файл без консольного окна:
+### Step 3. Building the Executable (.exe)
+If you want to build a standalone `.exe` file without a console window yourself:
 ```bash
 pip install pyinstaller
 pyinstaller --onefile --noconsole --name="WorkshopManagerServer" main.py
 ```
-Готовый файл появится в созданной папке `dist`.
+The compiled file will appear in the newly created `dist` folder.
 
 </details>
-```
 
 ---
 
-Лицензия
-Этот проект распространяется под лицензией GNU GPL v3.
+## License
+This project is distributed under the GNU GPL v3 license.
