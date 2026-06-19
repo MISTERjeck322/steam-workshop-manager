@@ -12,17 +12,23 @@ import threading
 import queue
 import urllib.request
 import urllib.parse
+import sys
 from datetime import datetime
 
-# --- НАСТРОЙКИ ---
+# --- НАСТРОЙКИ ПУТЕЙ С УЧЕТОМ КОМПИЛЯЦИИ ---
 DB_FILE = "downloaded_mods.json"
 GAME_SETTINGS_FILE = "game_settings.json"
-DOWNLOADS_DIR = os.path.abspath("downloads")
 
-# Путь по умолчанию: папка steamCMD/steamcmd.exe в корне сервера
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, 'frozen', False):
+    # Если скрипт скомпилирован (PyInstaller), используем папку, где лежит .exe file
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    # Если скрипт запущен как обычный .py файл
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DOWNLOADS_DIR = os.path.join(BASE_DIR, "downloads")
 STEAMCMD_PATH = os.path.join(BASE_DIR, "steamCMD", "steamcmd.exe")
-# ------------------
+# ------------------------------------------
 
 db_lock = threading.Lock()
 settings_lock = threading.Lock()
