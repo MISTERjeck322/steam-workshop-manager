@@ -140,6 +140,49 @@ def get_local_mod_mtime(local_path: str) -> int:
     return int(max_mtime)
 
 
+def get_actual_mod_root(base_path: str) -> str:
+    """
+    Универсальный поиск реального корня мода.
+    Пропускает пустые папки-обертки (например, 'mods/ModName' в Project Zomboid).
+    """
+    current_path = base_path
+    
+    while True:
+        try:
+            items = os.listdir(current_path)
+        except Exception:
+            break
+            
+        if not items:
+            break
+            
+        folders = []
+        files = []
+        
+        for item in items:
+            full_path = os.path.join(current_path, item)
+            if os.path.isdir(full_path):
+                folders.append(full_path)
+            else:
+                files.append(full_path)
+                
+        # Если обнаружен хотя бы один файл (конфиг, манифест и т.д.), это рабочий корень
+        if len(files) > 0:
+            break
+            
+        # Если папок больше одной, останавливаемся, чтобы не потерять структуру
+        if len(folders) > 1:
+            break
+            
+        # Если файлов нет и папка ровно одна — это обертка. Переходим глубже
+        if len(folders) == 1:
+            current_path = folders[0]
+        else:
+            break
+            
+    return current_path
+
+
 def run_steamcmd_single(app_id: str, mod_id: str):
     """Запускает процесс скачивания и сохраняет ссылку на него в глобальном реестре."""
     if not os.path.exists(STEAMCMD_PATH):
@@ -305,6 +348,7 @@ def process_task(mod_id: str, app_id: str, title: str, game_name: str):
 
             os.makedirs(target_path, exist_ok=True)
 
+            # Очистка целевой папки перед копированием
             for item in os.listdir(target_path):
                 item_p = os.path.join(target_path, item)
                 if os.path.isdir(item_p):
@@ -312,8 +356,12 @@ def process_task(mod_id: str, app_id: str, title: str, game_name: str):
                 else:
                     os.remove(item_p)
 
-            for item in os.listdir(downloaded_path):
-                s = os.path.join(downloaded_path, item)
+            # Вычисление реального корня мода без лишней вложенности
+            actual_source_path = get_actual_mod_root(downloaded_path)
+
+            # Копирование структуры файлов из реального корня
+            for item in os.listdir(actual_source_path):
+                s = os.path.join(actual_source_path, item)
                 d = os.path.join(target_path, item)
                 if os.path.isdir(s):
                     shutil.copytree(s, d)
