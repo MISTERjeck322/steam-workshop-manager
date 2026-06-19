@@ -56,7 +56,7 @@ Development and basic testing were conducted in the following environment:
 
 *Done! Download buttons will now appear on Steam Workshop mod pages.*
 
-Support Ko-Fi https://ko-fi.com/misterjeck
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/misterjeck)
 ---
 
 ## 🛠 Developer Instructions (Running from Source Code)
