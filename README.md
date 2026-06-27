@@ -56,6 +56,8 @@ Development and basic testing were conducted in the following environment:
 
 *Done! Download buttons will now appear on Steam Workshop mod pages.*
 
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=flat&logo=discord&logoColor=white)](https://discord.gg/awe2z5xVye)
+
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/misterjeck)
 ---
 
