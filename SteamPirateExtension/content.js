@@ -92,6 +92,7 @@
                 text-decoration: none !important;
                 z-index: 10 !important;
                 position: relative !important;
+                transition: all 0.2s;
             }
             .pirate-card-btn:hover { filter: brightness(1.15); color: #ffffff !important; }
 
@@ -110,6 +111,7 @@
                 font-weight: bold !important;
                 text-shadow: 1px 1px 0px rgba(0,0,0,0.5) !important;
                 text-decoration: none !important;
+                transition: all 0.2s;
             }
             .pirate-collection-btn:hover { filter: brightness(1.15); color: #ffffff !important; }
             
@@ -502,13 +504,63 @@
         .catch(error => showNotification(t('toast_no_server'), true));
     }
 
+    // --- ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ СОСТОЯНИЯ КНОПОК ---
+    function updatePageButtonsState() {
+        const buttons = document.querySelectorAll('.pirate-injected-btn, .pirate-card-btn, .pirate-collection-btn');
+        buttons.forEach(btn => {
+            const modId = btn.dataset.modId;
+            if (!modId || modId === 'unknown') return;
+
+            const mod = activeMods.find(m => m.id === modId);
+            const textElement = btn.querySelector('span') || btn;
+
+            if (!mod) {
+                // Если мода нет в списке загрузок
+                textElement.innerHTML = t('download');
+                btn.style.pointerEvents = 'auto';
+                btn.style.filter = 'none';
+                btn.style.opacity = '1';
+                return;
+            }
+
+            // Изменяем вид кнопок в зависимости от статуса загрузки
+            if (mod.status === 'completed') {
+                textElement.innerHTML = '✔️ ' + t('ready');
+                btn.style.pointerEvents = 'none'; // Блокируем нажатие
+                btn.style.filter = 'grayscale(100%)'; // Делаем серой
+                btn.style.opacity = '0.7';
+            } else if (mod.status === 'downloading' || mod.status === 'updating') {
+                textElement.innerHTML = '⏳ ' + Math.floor(mod.progress || 0) + '%';
+                btn.style.pointerEvents = 'none';
+                btn.style.filter = 'none';
+                btn.style.opacity = '0.8';
+            } else if (mod.status === 'pending') {
+                textElement.innerHTML = '⏱ ' + t('queued');
+                btn.style.pointerEvents = 'none';
+                btn.style.filter = 'none';
+                btn.style.opacity = '0.8';
+            } else if (mod.status === 'update_available') {
+                textElement.innerHTML = '⬆️ ' + t('update_available');
+                btn.style.pointerEvents = 'auto'; // Разрешаем нажать для обновления
+                btn.style.filter = 'hue-rotate(90deg)'; // Зеленоватый оттенок
+                btn.style.opacity = '1';
+            } else if (mod.status === 'failed') {
+                textElement.innerHTML = '❌ ' + t('error');
+                btn.style.pointerEvents = 'auto'; // Разрешаем перекачать
+                btn.style.filter = 'hue-rotate(300deg)'; // Красноватый оттенок
+                btn.style.opacity = '1';
+            }
+        });
+    }
+
     function processPageElements() {
         injectStyles();
         let mainSubscribeBtn = document.getElementById('SubscribeItemBtn');
         if (mainSubscribeBtn && !mainSubscribeBtn.classList.contains('pirate-processed')) {
             mainSubscribeBtn.classList.add('pirate-processed');
             mainSubscribeBtn.style.setProperty('display', 'none', 'important');
-            let pirateBtn = createMainPirateButton(function(e) {
+            let modIdMain = getModIdFromUrl(window.location.href);
+            let pirateBtn = createMainPirateButton(modIdMain, function(e) {
                 e.preventDefault();
                 sendToPythonServer(window.location.href, getPageMetadata());
             });
@@ -520,7 +572,8 @@
             if (!card) return;
             if (card.classList.contains('pirate-card-processed')) return;
             card.classList.add('pirate-card-processed');
-            let cardBtn = createCardPirateButton();
+            let modIdCard = getModIdFromUrl(link.href);
+            let cardBtn = createCardPirateButton(modIdCard);
             cardBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -540,6 +593,7 @@
             if (modId) {
                 let pirateBtn = document.createElement('a');
                 pirateBtn.className = 'pirate-collection-btn';
+                pirateBtn.dataset.modId = modId; // Добавляем ID
                 pirateBtn.innerHTML = t('download');
                 pirateBtn.href = '#';
                 pirateBtn.addEventListener('click', function(e) {
@@ -578,21 +632,23 @@
         });
     }
 
-    function createMainPirateButton(onClickCallback) {
+    function createMainPirateButton(modId, onClickCallback) {
         let btn = document.createElement('div');
         btn.className = 'btn_green_white_innerfade btn_medium pirate-injected-btn';
-        btn.style.cssText = 'background-color: #224c64; background-image: linear-gradient(to bottom, #417a9b 0%, #224c64 100%); border-color: #3d6c8f; display: inline-block; cursor: pointer; margin-left: 10px;';
+        btn.dataset.modId = modId; // Добавляем ID для синхронизации
+        btn.style.cssText = 'background-color: #224c64; background-image: linear-gradient(to bottom, #417a9b 0%, #224c64 100%); border-color: #3d6c8f; display: inline-block; cursor: pointer; margin-left: 10px; transition: all 0.2s;';
         let span = document.createElement('span');
         span.innerHTML = t('download');
-        span.style.cssText = 'padding: 0 15px; color: #ffffff; text-shadow: 1px 1px 0px rgba(0,0,0,0.5);';
+        span.style.cssText = 'padding: 0 15px; color: #ffffff; text-shadow: 1px 1px 0px rgba(0,0,0,0.5); display: inline-block; width: 100%;';
         btn.appendChild(span);
         btn.addEventListener('click', onClickCallback);
         return btn;
     }
 
-    function createCardPirateButton() {
+    function createCardPirateButton(modId) {
         let btn = document.createElement('a');
         btn.className = 'pirate-card-btn';
+        btn.dataset.modId = modId; // Добавляем ID для синхронизации
         btn.innerHTML = t('download');
         btn.href = '#';
         return btn;
@@ -601,14 +657,18 @@
     function createDownloadAllButton(onClickCallback) {
         let btn = document.createElement('a');
         btn.className = 'general_btn subscribe pirate-collection-all-btn';
-        btn.style.cssText = 'background: linear-gradient(to bottom, #417a9b 0%, #224c64 100%) !important; border: 1px solid #3d6c8f !important; color: #ffffff !important; cursor: pointer; display: inline-flex; align-items: center; padding: 0 15px; height: 30px; border-radius: 3px; font-weight: bold; margin-right: 5px; text-shadow: 1px 1px 0px rgba(0,0,0,0.5); text-decoration: none;';
+        btn.style.cssText = 'background: linear-gradient(to bottom, #417a9b 0%, #224c64 100%) !important; border: 1px solid #3d6c8f !important; color: #ffffff !important; cursor: pointer; display: inline-flex; align-items: center; padding: 0 15px; height: 30px; border-radius: 3px; font-weight: bold; margin-right: 5px; text-shadow: 1px 1px 0px rgba(0,0,0,0.5); text-decoration: none; transition: all 0.2s;';
         btn.innerHTML = `<span style="color: white !important;">${t('download_all')}</span>`;
         btn.addEventListener('click', onClickCallback);
         return btn;
     }
 
-    function startPolling() { if (!pollIntervalId) pollIntervalId = setInterval(refreshSidebar, 2000); }
-    function stopPolling() { if (pollIntervalId) { clearInterval(pollIntervalId); pollIntervalId = null; } }
+    // Фоновый поллинг теперь работает всегда, чтобы обновлять кнопки на странице в реалтайме
+    function startPolling() { 
+        if (!pollIntervalId) {
+            pollIntervalId = setInterval(refreshSidebar, 2000); 
+        }
+    }
 
     function buildSidebarUI() {
         injectStyles();
@@ -678,13 +738,12 @@
         widget.addEventListener('click', () => {
             panel.classList.toggle('open');
             sidebarOpenState = panel.classList.contains('open');
-            if (sidebarOpenState) { refreshSidebar(); startPolling(); } else stopPolling();
+            if (sidebarOpenState) renderSidebarContent();
         });
 
         document.getElementById('pirate-sidebar-close').addEventListener('click', () => {
             panel.classList.remove('open');
             sidebarOpenState = false;
-            stopPolling();
         });
 
         document.getElementById('pirate-search-game').addEventListener('input', renderSidebarContent);
@@ -723,8 +782,6 @@
             };
             reader.readAsText(file);
         });
-
-        if (sidebarOpenState) { refreshSidebar(); startPolling(); }
     }
 
     function showImportConfigModal(importedMods) {
@@ -790,10 +847,15 @@
         ]).then(([modsData, settingsData]) => {
             activeMods = modsData;
             gameSettings = settingsData;
-            if (!document.getElementById('pirate-import-modal')) {
+            
+            updatePageButtonsState(); // Синхронизируем кнопки со списком скачиваний
+            
+            if (sidebarOpenState && !document.getElementById('pirate-import-modal')) {
                 renderSidebarContent();
             }
-        }).catch(() => console.log("[Pirate Extension] Error: Python Server is offline."));
+        }).catch(() => {
+            // Тихо гасим ошибку, чтобы не спамить в консоль, если сервер оффлайн
+        });
     }
 
     function saveGameSettingsOnServer(appId, gameName, customPath) {
@@ -976,8 +1038,11 @@
         if (window.pirateObserver) window.pirateObserver.disconnect();
         activeAppId = getAppId();
         activeGameName = activeAppId ? getGameName() : null;
+        
         processPageElements();
         buildSidebarUI();
+        updatePageButtonsState(); 
+        
         if (window.pirateObserver) window.pirateObserver.observe(document.body, { childList: true, subtree: true });
     }
 
@@ -985,6 +1050,8 @@
     window.addEventListener('pageshow', () => { selectedGame = null; refreshSidebar(); safeInit(); });
 
     safeInit();
+    startPolling(); // Запускаем фоновый опрос сервера навсегда (для обновления % загрузки прямо на кнопках)
+
     window.pirateObserver = new MutationObserver(() => safeInit());
     window.pirateObserver.observe(document.body, { childList: true, subtree: true });
 })();
