@@ -102,4 +102,4 @@ The compiled file will appear in the newly created `dist` folder.
 ---
 
 ## License
-This project is distributed under the GNU GPL v3 license.
+This project is distributed under the MIT license.
